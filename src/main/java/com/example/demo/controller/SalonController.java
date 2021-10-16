@@ -10,15 +10,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.ModelType;
 import com.example.demo.utils.ConnectionModel;
 
 @RestController
-@RequestMapping("/api/v1/salon")
+@RequestMapping("/api/v1/salon/vashi")
 public class SalonController {
-	@GetMapping("/vashi")
+	@GetMapping("")
     public ResponseEntity<List<ModelType>> getAll(){
     	List<ModelType> temp = new ArrayList<ModelType>();
     	 Connection c = null;
@@ -33,6 +34,46 @@ public class SalonController {
             stmt = c.createStatement();
             ResultSet rs = stmt.executeQuery( "SELECT id,name,rating,rating_count,address,"
             		+ "verified,ST_AsGeoJSON(location) from salon_vashi;" );
+            
+            while ( rs.next() ) {
+               int id = rs.getInt("id");
+               String  name = rs.getString("name");
+               double rating = rs.getDouble("rating");
+               int rating_count = rs.getInt("rating_count");
+               String address = rs.getString("address");
+               String verified = rs.getString("verified");
+               String location = rs.getString("st_asgeojson");
+               temp.add(new ModelType(id,name,rating,rating_count,address,verified,location));   
+               
+            }
+            rs.close();
+            stmt.close();
+            c.close();
+            return new ResponseEntity<>(temp, HttpStatus.OK);
+         } catch ( Exception e ) {
+            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            System.exit(0);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+         }
+    }
+	
+	
+	@GetMapping("/nearest")
+    public ResponseEntity<List<ModelType>> getAllNearest(@RequestParam(defaultValue="0.0") double longitude,
+    		@RequestParam(defaultValue="0.0") double latitude){
+    	List<ModelType> temp = new ArrayList<ModelType>();
+    	 Connection c = null;
+         Statement stmt = null;
+         try {
+            Class.forName("org.postgresql.Driver");
+            
+            c = ConnectionModel.getConnection();
+            c.setAutoCommit(false);
+           
+
+            stmt = c.createStatement();
+            ResultSet rs = stmt.executeQuery( "SELECT id,name,rating,rating_count,address,"
+            		+ "verified,ST_AsGeoJSON(location) from salon_vashi where ST_DWithin(location::geography,ST_GeomFromText('POINT("+longitude+" "+latitude+")')::geography,"+ConnectionModel.FIVE_KM+");" );
             
             while ( rs.next() ) {
                int id = rs.getInt("id");
