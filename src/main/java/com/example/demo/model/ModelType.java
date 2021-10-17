@@ -8,6 +8,7 @@ public class ModelType {
 	private String address;
 	private String verified;
 	private String location;
+	private double distance;
 	
 	public ModelType() {
 		
@@ -22,6 +23,20 @@ public class ModelType {
 		this.verified = verified;
 		this.location = location;
 	}
+	
+	public ModelType(int id,String name,double rating,int rating_count,String address,String verified,String location,double distance) {
+		
+		this.id = id;
+		this.name = name;
+		this.rating = rating;
+		this.rating_count = rating_count;
+		this.address = address;
+		this.verified = verified;
+		this.location = location;
+		this.distance = distance;
+		System.out.println("Here "+this.distance);
+	}
+
 	/**
 	 * @return the id
 	 */
@@ -119,4 +134,19 @@ public class ModelType {
 	public void setLocation(String location) {
 		this.location = location;
 	}
+
+	/**
+	 * @return the distance
+	 */
+	public double getDistance() {
+		return distance;
+	}
+
+	/**
+	 * @param distance the distance to set
+	 */
+	public void setDistance(double distance) {
+		this.distance = distance;
+	}
+
 }
